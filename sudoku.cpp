@@ -1,34 +1,32 @@
 //
-// Created by Mwiza Simbeye on 13/03/2020.
+// Created by Mwiza Simbeye on 01/04/2020.
 //
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <iostream>
+#include "gflags/gflags.h"
+#include "glog/logging.h"
 
 using namespace cv;
+using namespace std;
 
-void help(char** argv ) {
-    std::cout << "\n"
-              << "A Sudoku OpenCV program that loads an image and extracts map.\n"
-              << argv[0] <<" <path/filename>\n"
-              << "For example:\n"
-              << argv[0] << " ../map.jpg\n"
-              << std::endl;
-}
+DEFINE_bool(reset, true, "Include 'advanced' options in the menu listing");
+DEFINE_string(image_path, "", "Path to image for camara calibration.");
 
+int main(int argc, char** argv) {
+    // Initialise flag parsing.
+    gflags::ParseCommandLineFlags(&argc, &argv, true);
+    
+    CHECK(!FLAGS_image_path.empty())
+      << "-image_path is missing.";
 
-int main( int argc, char** argv ) {
-
-    if (argc != 2) {
-        help(argv);
-        return 0;
-    }
+    cout << FLAGS_image_path << endl;
 
     // Load image
-    Mat img = imread( argv[1], 0);
+    Mat img = imread(FLAGS_image_path, 0);
     Mat outerBox = Mat(img.size(), CV_8UC1);
 
-    // Smoothing
+    // Smoothin
     GaussianBlur(img, img, Size(11, 11), 0);
     adaptiveThreshold(img, outerBox, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, 2);
     bitwise_not(outerBox, outerBox);
