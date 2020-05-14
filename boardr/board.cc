@@ -1,11 +1,10 @@
 // Start
-//
 // Created by Mwiza Simbeye on 01/04/2020.
 //
 
 #include "gflags/gflags.h"
 #include "absl/flags/flag.h"
-#include "glog/logging.h"
+#include "absl/flags/parse.h"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/opencv.hpp"
 #include <iostream>
@@ -17,14 +16,14 @@ using std::endl;
 using namespace cv;
 using namespace std;
 
-DEFINE_bool(debug, true, "Put program in debug mode");
-DEFINE_string(image_path, "board.png",
+ABSL_FLAG(bool, debug, true, "Put program in debug mode");
+ABSL_FLAG(string, image_path, "board.png",
               "Path to image save initial board detection image file..");
-DEFINE_int32(n_boards, 1, "Number of boards to locate");
-DEFINE_double(image_sf, 0.5f, "Image sf");
-DEFINE_double(delay, 1.f, "Delay");
-DEFINE_int32(board_w, 9, "Board width");
-DEFINE_int32(board_h, 6, "Board height");
+ABSL_FLAG(int16_t, n_boards, 1, "Number of boards to locate");
+ABSL_FLAG(double, image_sf, 0.5f, "Image sf");
+ABSL_FLAG(double, delay, 1.f, "Delay");
+ABSL_FLAG(int16_t ,board_w, 9, "Board width");
+ABSL_FLAG(int16_t, board_h, 6, "Board height");
 
 /// Finding contours
 Mat src_gray;
@@ -34,11 +33,11 @@ int largest_contour_index = 0;
 int largest_area = 0;
 
 // Get flag params
-int board_w = FLAGS_board_w;
-int board_h = FLAGS_board_h;
-int n_boards = FLAGS_n_boards;
-float delay = FLAGS_delay;
-float image_sf = FLAGS_image_sf;
+int board_w = absl::GetFlag(FLAGS_board_w);
+int board_h = absl::GetFlag(FLAGS_board_h);
+int n_boards = absl::GetFlag(FLAGS_n_boards);
+float delay = absl::GetFlag(FLAGS_delay);
+float image_sf = absl::GetFlag(FLAGS_image_sf);
 
 // Calculate the board size
 int board_n = board_w * board_h;
@@ -55,8 +54,6 @@ Size image_size;
 
 bool findChessBoard(VideoCapture capture) {
   // Check if chessboard exists in the image.
-  bool chessboard_exists = false;
-
   while (image_points.size() < (size_t)n_boards) {
     Mat image0, image;
     capture >> image0;
@@ -91,12 +88,11 @@ bool findChessBoard(VideoCapture capture) {
            << endl;
       imshow("Calibration", image);
 
-      chessboard_exists = true;
+      return true;
     } else {
-      chessboard_exists =  false;
+      return false;
     }
   }
-  return chessboard_exists;
 }
 
 void thresh_callback(int, void *) {
@@ -132,7 +128,7 @@ tuple<Mat, Mat> cleanImage(Mat img) {
   // Mat kernel = (Mat_<uchar>(3, 3) << 0, 1, 0, 1, 1, 1, 0, 1, 0);
   // dilate(outerBox, outerBox, kernel);
 
-  if (FLAGS_debug) {
+  if (absl::GetFlag(FLAGS_debug)) {
     imwrite("adapt_board.png", outerBox);
     imshow("Map", outerBox);
     waitKey(0);
@@ -203,7 +199,8 @@ Mat findCornersMask(Mat adaptiveThresh, Mat img) {
 int main(int argc, char **argv) {
   bool found = false;
   // Initialise flag parsing.
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  absl::ParseCommandLine(argc, argv);
+  // gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   // Start camera and take a picture.
   VideoCapture camera(0);
@@ -213,6 +210,7 @@ int main(int argc, char **argv) {
   }
   Mat image;
   while (found == false) {
+    cout << "We are here.." << endl;
     Mat frame;
     camera >> frame;
     if (frame.empty())
@@ -221,9 +219,10 @@ int main(int argc, char **argv) {
     bool chessboard_find = findChessBoard(camera);
     if (chessboard_find) {
       cout << "Found: " << (bool)chessboard_find << endl;
-      imwrite(FLAGS_image_path, frame);
+      imwrite(absl::GetFlag(FLAGS_image_path), frame);
+      // imwrite(FLAGS_image_path, frame);
       found = true;
-      if (FLAGS_debug) {
+      if (absl::GetFlag(FLAGS_debug)) {
         imshow("Board", frame);
         waitKey(0);
         destroyWindow("Board");
@@ -231,7 +230,7 @@ int main(int argc, char **argv) {
       // Board detection ops
       // We will perform adaptive thresholding on the image to extract the
       // board.
-      src_gray = imread(FLAGS_image_path, 0);
+      src_gray = imread(absl::GetFlag(FLAGS_image_path), 0);
 
       // tuple<Mat, Mat> result = cleanImage(image);
       // findCornersMask(get<0>(result), get<1>(result));
