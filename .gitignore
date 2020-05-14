@@ -35,3 +35,8 @@
 .idea/*
 
 cmake-build-debug/
+
+# visual studio
+.vscode/*
+
+bazel-*
