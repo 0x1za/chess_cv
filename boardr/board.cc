@@ -54,6 +54,7 @@ Size image_size;
 
 bool findChessBoard(VideoCapture capture) {
   // Check if chessboard exists in the image.
+  bool chessboard_exists = false;
 
   while (image_points.size() < (size_t)n_boards) {
     Mat image0, image;
@@ -89,11 +90,12 @@ bool findChessBoard(VideoCapture capture) {
            << endl;
       imshow("Calibration", image);
 
-      return true;
+      chessboard_exists = true;
     } else {
-      return false;
+      chessboard_exists =  false;
     }
   }
+  return chessboard_exists;
 }
 
 void thresh_callback(int, void *) {

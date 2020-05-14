@@ -68,7 +68,6 @@ int main(int argc, char **argv) {
     drawChessboardCorners(image, board_sz, corners, found);
 
     // If a board was found, add it to our data.
-    //
     double timestamp = (double)clock() / CLOCKS_PER_SEC;
 
     if (found && timestamp - last_captured_timestamp > 1) {
