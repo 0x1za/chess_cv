@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 # The following build rule assumes that OpenCV is installed by
 # 'brew install opencv@3' command on macos.
 # If you install OpenCV separately, please modify the build rule accordingly.

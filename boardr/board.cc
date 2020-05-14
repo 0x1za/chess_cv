@@ -4,6 +4,7 @@
 //
 
 #include "gflags/gflags.h"
+#include "absl/flags/flag.h"
 #include "glog/logging.h"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/opencv.hpp"
