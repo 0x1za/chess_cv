@@ -10,20 +10,22 @@ algorithm. We bring the interactive experience to RL agents.
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+The project uses Bazel as a build system [bazel](https://https://bazel.build/) 
 
 ```bash
-pip install foobar
+bazel build ..
 ```
 
 ## Usage
 
-```python
-import foobar
+Camera Calibration
+```bash
+bazel run //camera:calibrate
+```
 
-foobar.pluralize('word') # returns 'words'
-foobar.pluralize('goose') # returns 'geese'
-foobar.singularize('phenomena') # returns 'phenomenon'
+Board recognition
+```bash
+bazel run //boardr:board
 ```
 
 ## Contributing
