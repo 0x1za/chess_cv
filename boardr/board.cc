@@ -2,7 +2,6 @@
 // Created by Mwiza Simbeye on 01/04/2020.
 //
 
-#include "gflags/gflags.h"
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "opencv2/highgui/highgui.hpp"
@@ -18,11 +17,11 @@ using namespace std;
 
 ABSL_FLAG(bool, debug, true, "Put program in debug mode");
 ABSL_FLAG(string, image_path, "board.png",
-              "Path to image save initial board detection image file..");
+          "Path to image save initial board detection image file..");
 ABSL_FLAG(int16_t, n_boards, 1, "Number of boards to locate");
 ABSL_FLAG(double, image_sf, 0.5f, "Image sf");
 ABSL_FLAG(double, delay, 1.f, "Delay");
-ABSL_FLAG(int16_t ,board_w, 9, "Board width");
+ABSL_FLAG(int16_t, board_w, 9, "Board width");
 ABSL_FLAG(int16_t, board_h, 6, "Board height");
 
 /// Finding contours
@@ -31,6 +30,9 @@ int thresh = 100;
 RNG rng(12345);
 int largest_contour_index = 0;
 int largest_area = 0;
+
+// Images 
+Mat frame;
 
 // Get flag params
 int board_w = absl::GetFlag(FLAGS_board_w);
@@ -96,7 +98,12 @@ bool findChessBoard(VideoCapture capture) {
 }
 
 void thresh_callback(int, void *) {
+  double maxArea;
+  int maxContourId = -1;
   Mat canny_output;
+  Rect bounding_rect;
+
+  // Canny edge detection.
   Canny(src_gray, canny_output, thresh, thresh * 2);
 
   vector<vector<Point>> contours;
@@ -104,12 +111,20 @@ void thresh_callback(int, void *) {
   findContours(canny_output, contours, hierarchy, RETR_TREE,
                CHAIN_APPROX_SIMPLE);
   Mat drawing = Mat::zeros(canny_output.size(), CV_8UC3);
-  for (size_t i = 0; i < contours.size(); i++) {
-    Scalar color =
-        Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256));
-    drawContours(drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+  for (size_t i = 0; i < contours.size(); i++) { 
+    double area = contourArea(contours.at(i));
+    if (area > maxArea) {
+      maxArea = area;
+      maxContourId = i;
+      bounding_rect = boundingRect(contours[i]);
+    }
   }
-  imshow("Contours", drawing);
+
+  Scalar color = Scalar(0, 255, 0);
+  drawContours(frame, contours,maxContourId, color, 3); // Draw the largest contour using previously stored index.
+
+  imshow( "Chessboard", frame);
+  waitKey();
 }
 
 tuple<Mat, Mat> cleanImage(Mat img) {
@@ -125,14 +140,14 @@ tuple<Mat, Mat> cleanImage(Mat img) {
   // GaussianBlur(img, img, Size(11, 11), 0);
   adaptiveThreshold(img, outerBox, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY,
                     125, 1);
-  // Mat kernel = (Mat_<uchar>(3, 3) << 0, 1, 0, 1, 1, 1, 0, 1, 0);
-  // dilate(outerBox, outerBox, kernel);
+  Mat kernel = (Mat_<uchar>(5, 5) << 0, 1, 0, 1, 1, 1, 0, 1, 0);
+  dilate(outerBox, outerBox, kernel);
 
   if (absl::GetFlag(FLAGS_debug)) {
     imwrite("adapt_board.png", outerBox);
     imshow("Map", outerBox);
     waitKey(0);
-    destroyWindow("Map");
+    destroyWindow("Adaptive Threshold");
   }
 
   return {outerBox, img};
@@ -210,8 +225,6 @@ int main(int argc, char **argv) {
   }
   Mat image;
   while (found == false) {
-    cout << "We are here.." << endl;
-    Mat frame;
     camera >> frame;
     if (frame.empty())
       break; // end of video stream
@@ -231,8 +244,8 @@ int main(int argc, char **argv) {
       // We will perform adaptive thresholding on the image to extract the
       // board.
       src_gray = imread(absl::GetFlag(FLAGS_image_path), 0);
-
-      // tuple<Mat, Mat> result = cleanImage(image);
+      // cout << src_gray << endl;
+      // tuple<Mat, Mat> result = cleanImage(src_gray);
       // findCornersMask(get<0>(result), get<1>(result));
       blur(src_gray, src_gray, Size(3, 3));
       const char *source_window = "Source";
