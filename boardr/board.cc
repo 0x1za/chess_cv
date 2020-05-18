@@ -153,63 +153,6 @@ tuple<Mat, Mat> cleanImage(Mat img) {
   return {outerBox, img};
 }
 
-Mat findCornersMask(Mat adaptiveThresh, Mat img) {
-  Mat imageCopy;
-  imageCopy = img.clone();
-  vector<vector<Point>> contours;
-  vector<Vec4i> hierarchy;
-  findContours(adaptiveThresh, contours, hierarchy, RETR_TREE,
-               CHAIN_APPROX_SIMPLE);
-
-  Rect bounding_rect;
-  double Lratio;
-  double Lperimeter;
-  double ratio;
-  vector<Point> largest;
-  double Larea;
-  int largest_area = 0;
-  double perimeter;
-  double area;
-  int largest_contour_index = 0;
-
-  cout << "Contours: " << sizeof(contours) << endl;
-
-  for (int i = 0, size = sizeof(contours); i != size; ++i) {
-    area = contourArea(contours[i]);
-    perimeter = arcLength(contours[i], true);
-
-    if (i == 0) {
-      Lratio = 0;
-    }
-
-    if (perimeter > 0) {
-      ratio = area / perimeter;
-      if (ratio > Lratio) {
-        largest = contours[i];
-        Lratio = ratio;
-        Lperimeter = perimeter;
-        Larea = area;
-      }
-    }
-    cout << Larea << endl;
-    double a = contourArea(contours[i]);
-    if (a > largest_area) {
-      largest_area = a;
-      largest_contour_index = i;
-      cout << i << " area  " << a << endl;
-      bounding_rect = boundingRect(contours[i]);
-    }
-  }
-  Scalar color(0, 255, 0);
-  // drawContours(imageCopy, largest, -1, color, CV_FILLED, 8, hierarchy);
-  drawContours(img, contours, largest_contour_index, color, CV_FILLED, 8,
-               hierarchy);
-  rectangle(img, bounding_rect, Scalar(0, 0, 255), 2, 8, 0);
-  imshow("Components", img);
-  waitKey(0);
-
-  return imageCopy;
-}
 
 int main(int argc, char **argv) {
   bool found = false;
