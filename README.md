@@ -10,7 +10,7 @@ algorithm. We bring the interactive experience to RL agents.
 
 ## Installation
 
-The project uses Bazel as a build system [bazel](https://https://bazel.build/) 
+The project uses Bazel as a build system [bazel](https://bazel.build/) 
 
 ```bash
 bazel build ..

@@ -12,6 +12,7 @@ using std::cerr;
 using std::endl;
 using namespace cv;
 using namespace std;
+using namespace absl;
 
 DEFINE_bool(reset, true, "Include 'advanced' options in the menu listing");
 DEFINE_string(image_path, "", "Path to image for camara calibration.");

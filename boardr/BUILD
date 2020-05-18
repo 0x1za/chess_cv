@@ -6,7 +6,6 @@ cc_binary(
     srcs = ["board.cc"],
     deps = [
         "@opencv//:opencv",
-        "@com_github_gflags_gflags//:gflags",
-        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
     ],
 )
