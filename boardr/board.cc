@@ -1,6 +1,5 @@
 // Start
 // Created by Mwiza Simbeye on 01/04/2020.
-//
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
@@ -31,8 +30,9 @@ RNG rng(12345);
 int largest_contour_index = 0;
 int largest_area = 0;
 
-// Images 
+// Images
 Mat frame;
+Mat outerBox;
 
 // Get flag params
 int board_w = absl::GetFlag(FLAGS_board_w);
@@ -100,8 +100,13 @@ bool findChessBoard(VideoCapture capture) {
 void thresh_callback(int, void *) {
   double maxArea;
   int maxContourId = -1;
+  Mat mask;
+  Mat extracted;
   Mat canny_output;
+  Mat chessboard_edge;
   Rect bounding_rect;
+  double perimeter;
+  double epsilon;
 
   // Canny edge detection.
   Canny(src_gray, canny_output, thresh, thresh * 2);
@@ -111,33 +116,47 @@ void thresh_callback(int, void *) {
   findContours(canny_output, contours, hierarchy, RETR_TREE,
                CHAIN_APPROX_SIMPLE);
   Mat drawing = Mat::zeros(canny_output.size(), CV_8UC3);
-  for (size_t i = 0; i < contours.size(); i++) { 
+  for (size_t i = 0; i < contours.size(); i++) {
     double area = contourArea(contours.at(i));
     if (area > maxArea) {
       maxArea = area;
       maxContourId = i;
       bounding_rect = boundingRect(contours[i]);
+      perimeter = arcLength(contours.at(i), true);
     }
   }
 
   Scalar color = Scalar(0, 255, 0);
-  drawContours(frame, contours,maxContourId, color, 3); // Draw the largest contour using previously stored index.
-
-  imshow( "Chessboard", frame);
+  drawContours(frame, contours, maxContourId, color,
+               3); // Draw the largest contour using previously stored index.
+  imshow("Chessboard", frame);
   waitKey();
+
+  // Epsilon value for fitting contour
+  epsilon = 0.1 * perimeter;
+
+  // Find chessboard edge.
+  approxPolyDP(contours.at(maxContourId), chessboard_edge, epsilon, true);
+
+  mask = Mat::zeros(frame.cols, frame.rows, CV_8UC1) * 125;
+  fillConvexPoly(mask, chessboard_edge, 255, 1);
+  extracted = Mat(frame.cols, frame.rows, CV_8UC1, frame.type());
+  extracted.setTo(Scalar(0, 0, 0));
+
+  frame.copyTo(extracted, mask);
+  imshow("Masked", extracted);
+  waitKey(-1);
 }
 
 tuple<Mat, Mat> cleanImage(Mat img) {
   // Ideally we want to resize the image but we will do that later
   // TODO (mwizasimbeye11): Add resize op
   Mat gray;
-  Mat outerBox = Mat(img.size(), CV_8UC1);
-  // cvtColor(img, gray, CV_BGR2GRAY);
+  outerBox = Mat(img.size(), CV_8UC1);
   imshow("B2G", img);
   waitKey(0);
 
   // Smoothin
-  // GaussianBlur(img, img, Size(11, 11), 0);
   adaptiveThreshold(img, outerBox, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY,
                     125, 1);
   Mat kernel = (Mat_<uchar>(5, 5) << 0, 1, 0, 1, 1, 1, 0, 1, 0);
@@ -153,12 +172,10 @@ tuple<Mat, Mat> cleanImage(Mat img) {
   return {outerBox, img};
 }
 
-
 int main(int argc, char **argv) {
   bool found = false;
   // Initialise flag parsing.
   absl::ParseCommandLine(argc, argv);
-  // gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   // Start camera and take a picture.
   VideoCapture camera(0);
@@ -176,7 +193,6 @@ int main(int argc, char **argv) {
     if (chessboard_find) {
       cout << "Found: " << (bool)chessboard_find << endl;
       imwrite(absl::GetFlag(FLAGS_image_path), frame);
-      // imwrite(FLAGS_image_path, frame);
       found = true;
       if (absl::GetFlag(FLAGS_debug)) {
         imshow("Board", frame);
@@ -187,9 +203,6 @@ int main(int argc, char **argv) {
       // We will perform adaptive thresholding on the image to extract the
       // board.
       src_gray = imread(absl::GetFlag(FLAGS_image_path), 0);
-      // cout << src_gray << endl;
-      // tuple<Mat, Mat> result = cleanImage(src_gray);
-      // findCornersMask(get<0>(result), get<1>(result));
       blur(src_gray, src_gray, Size(3, 3));
       const char *source_window = "Source";
       namedWindow(source_window);
@@ -207,6 +220,5 @@ int main(int argc, char **argv) {
   }
 
   // the camera will be closed automatically upon exit
-  // cap.close();
   return 0;
 }
