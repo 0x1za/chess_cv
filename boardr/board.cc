@@ -20,8 +20,8 @@ ABSL_FLAG(string, image_path, "board.png",
 ABSL_FLAG(int16_t, n_boards, 1, "Number of boards to locate");
 ABSL_FLAG(double, image_sf, 0.5f, "Image sf");
 ABSL_FLAG(double, delay, 1.f, "Delay");
-ABSL_FLAG(int16_t, board_w, 9, "Board width");
-ABSL_FLAG(int16_t, board_h, 6, "Board height");
+ABSL_FLAG(int16_t, board_w, 7, "Board width");
+ABSL_FLAG(int16_t, board_h, 7, "Board height");
 
 /// Finding contours
 Mat src_gray;
@@ -220,5 +220,6 @@ int main(int argc, char **argv) {
   }
 
   // the camera will be closed automatically upon exit
+  // camera.close();
   return 0;
 }

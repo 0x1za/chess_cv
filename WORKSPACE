@@ -28,9 +28,8 @@ http_archive(
 # C++ rules for Bazel.
 http_archive(
     name = "rules_cc",
-    urls = ["https://github.com/bazelbuild/rules_cc/archive/9e10b8a6db775b1ecd358d8ddd3dab379a2c29a5.zip"],
-    strip_prefix = "rules_cc-9e10b8a6db775b1ecd358d8ddd3dab379a2c29a5",
-    sha256 = "954b7a3efc8752da957ae193a13b9133da227bdacf5ceb111f2e11264f7e8c95",
+    strip_prefix = "rules_cc-a508235df92e71d537fcbae0c7c952ea6957a912",
+    urls = ["https://github.com/bazelbuild/rules_cc/archive/a508235df92e71d537fcbae0c7c952ea6957a912.zip"],
 )
 
 git_repository(
