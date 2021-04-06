@@ -12,13 +12,10 @@ using std::cerr;
 using std::endl;
 using namespace cv;
 using namespace std;
-using namespace absl;
 
-DEFINE_bool(reset, true, "Include 'advanced' options in the menu listing");
 DEFINE_string(image_path, "", "Path to image for camara calibration.");
 DEFINE_int32(n_boards, 0, "Number of boards to calibrate");
 DEFINE_double(image_sf, 0.5f, "Image sf");
-DEFINE_double(delay, 1.f, "Delay");
 DEFINE_int32(board_w, 0, "Board width");
 DEFINE_int32(board_h, 0, "Board height");
 
@@ -30,7 +27,6 @@ int main(int argc, char **argv) {
   int board_w = FLAGS_board_w;
   int board_h = FLAGS_board_h;
   int n_boards = FLAGS_n_boards;
-  float delay = FLAGS_delay;
   float image_sf = FLAGS_image_sf;
 
   // Calculate the board size
