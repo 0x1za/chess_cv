@@ -10,3 +10,12 @@ cc_binary(
         "@com_github_gflags_gflags//:gflags"
     ],
 )
+
+cc_binary(
+    name = "rtsp_stream",
+    srcs = ["rtsp_stream.cpp"],
+    deps = [
+        "@opencv//:opencv",
+        "@com_github_gflags_gflags//:gflags"
+    ],
+)
