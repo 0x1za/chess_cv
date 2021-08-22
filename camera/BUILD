@@ -7,7 +7,9 @@ cc_binary(
     srcs = ["calibrate.cc"],
     deps = [
         "@opencv//:opencv",
-        "@com_github_gflags_gflags//:gflags"
+		"@com_google_absl//absl/flags:flag",
+		"@com_google_absl//absl/flags:parse",
+		"@com_github_gflags_gflags//:gflags"
     ],
 )
 

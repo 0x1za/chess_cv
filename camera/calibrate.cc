@@ -1,8 +1,8 @@
 //
 // Created by Mwiza Simbeye on 01/04/2020.
 //
-#include "gflags/gflags.h"
-#include "glog/logging.h"
+#include "absl/flags/flag.h"
+#include "absl/flags/parse.h"
 #include "opencv2/opencv.hpp"
 #include <iostream>
 
@@ -13,21 +13,21 @@ using std::vector;
 using namespace cv;
 using namespace std;
 
-DEFINE_string(image_path, "", "Path to image for camara calibration.");
-DEFINE_int32(n_boards, 1, "Number of boards to calibrate");
-DEFINE_double(image_sf, 0.5f, "Image sf");
-DEFINE_int32(board_w, 7, "Board width");
-DEFINE_int32(board_h, 9, "Board height");
+ABSL_FLAG(string, image_path, "", "Path to image for camara calibration.");
+ABSL_FLAG(int, n_boards, 10, "Number of boards to calibrate");
+ABSL_FLAG(float, image_sf, 0.5f, "Image sf");
+ABSL_FLAG(int, board_w, 7, "Board width");
+ABSL_FLAG(int, board_h, 9, "Board height");
 
 int main(int argc, char **argv) {
   // Initialise flag parsing.
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  absl::ParseCommandLine(argc, argv);
 
   // Get flag params
-  int board_w = FLAGS_board_w;
-  int board_h = FLAGS_board_h;
-  int n_boards = FLAGS_n_boards;
-  float image_sf = FLAGS_image_sf;
+  int board_w = absl::GetFlag(FLAGS_board_w);
+  int board_h = absl::GetFlag(FLAGS_board_h);
+  int n_boards = absl::GetFlag(FLAGS_n_boards);
+  float image_sf = absl::GetFlag(FLAGS_image_sf);
 
   // Calculate the board size
   int board_n = board_w * board_h;
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
         opts[j] = Point3f((float)(j / board_w), (float)(j % board_w), 0.f);
       }
       cout << "Collected our " << (int)image_points.size() << " of " << n_boards
-           << " needed chessboard images\n"
+           << " needed chessboard images"
            << endl;
     }
     imshow("Calibration", image);
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   }
 
   destroyWindow("Calibration");
-  cout << "\n\n*** CALIBRATING THE CAMERA...\n" << endl;
+  cout << "\n*** CALIBRATING CAMERA...\n" << endl;
 
   // Calibrate the Camera
   Mat intrinsic_matrix, distortion_coeff;
@@ -100,8 +100,8 @@ int main(int argc, char **argv) {
                       distortion_coeff, noArray(), noArray(),
                       CALIB_ZERO_TANGENT_DIST | CALIB_FIX_PRINCIPAL_POINT);
   // Save the intrinsic and distortion values.
-  cout << "*** DONE\n\nProjection error is " << err
-       << "\nStoring Intrinsics.xml and Distortions.xml files\n\n";
+  cout << "*** DONE!\n\nProjection error is " << err
+       << "\nSaving intrinsics.xml and distortions.xml files\n";
   FileStorage fs("intrinsics.xml", FileStorage::WRITE);
 
   fs << "image_width" << image_size.width << "image_height" << image_size.height
