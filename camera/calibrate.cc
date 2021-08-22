@@ -6,18 +6,18 @@
 #include "opencv2/opencv.hpp"
 #include <iostream>
 
-using std::vector;
-using std::cout;
 using std::cerr;
+using std::cout;
 using std::endl;
+using std::vector;
 using namespace cv;
 using namespace std;
 
 DEFINE_string(image_path, "", "Path to image for camara calibration.");
-DEFINE_int32(n_boards, 0, "Number of boards to calibrate");
+DEFINE_int32(n_boards, 1, "Number of boards to calibrate");
 DEFINE_double(image_sf, 0.5f, "Image sf");
-DEFINE_int32(board_w, 0, "Board width");
-DEFINE_int32(board_h, 0, "Board height");
+DEFINE_int32(board_w, 7, "Board width");
+DEFINE_int32(board_h, 9, "Board height");
 
 int main(int argc, char **argv) {
   // Initialise flag parsing.
@@ -131,8 +131,7 @@ int main(int argc, char **argv) {
     capture >> image0;
     if (image0.empty())
       break;
-    remap(image0, image, map1, map2, INTER_LINEAR,
-            BORDER_CONSTANT, Scalar());
+    remap(image0, image, map1, map2, INTER_LINEAR, BORDER_CONSTANT, Scalar());
     imshow("Undistorted", image);
     if ((waitKey(30) & 255) == 27)
       break;
