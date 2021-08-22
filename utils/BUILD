@@ -11,3 +11,13 @@ cc_binary(
         "@com_github_gflags_gflags//:gflags"
     ],
 )
+
+
+cc_binary(
+    name = "image_capture",
+    srcs = ["image_capture.cc"],
+    deps = [
+        "@opencv//:opencv",
+        "@com_github_gflags_gflags//:gflags"
+    ],
+)
